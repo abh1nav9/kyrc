@@ -1,0 +1,32 @@
+{
+  "name": "kyrc",
+  "version": "0.1.0",
+  "description": "A fast terminal typing test",
+  "bin": {
+    "kyrc": "bin/kyrc.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "keywords": ["typing", "typing-test", "cli", "tui", "monkeytype", "wpm"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abh1nav9/kyrc.git"
+  },
+  "homepage": "https://github.com/abh1nav9/kyrc",
+  "bugs": {
+    "url": "https://github.com/abh1nav9/kyrc/issues"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "optionalDependencies": {
+    "@kyrc/darwin-arm64": "0.1.0",
+    "@kyrc/darwin-x64": "0.1.0",
+    "@kyrc/linux-arm64": "0.1.0",
+    "@kyrc/linux-x64": "0.1.0",
+    "@kyrc/win32-x64": "0.1.0"
+  },
+  "files": ["bin/kyrc.js", "install.js", "resolve.js"]
+}

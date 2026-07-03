@@ -1,0 +1,10 @@
+/kyrc
+/dist/
+/npm/packages/
+/npm/kyrc/node_modules/
+*.out
+*.test
+.claude
+/site/node_modules/
+/site/dist/
+/site/.vite/

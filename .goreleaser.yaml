@@ -1,0 +1,51 @@
+# GoReleaser builds the cross-platform matrix, produces checksummed
+# archives + GitHub release, and updates a Homebrew tap — all from `git tag`.
+# Retrofitting distribution is miserable; this exists from day one.
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: kyrc
+    main: ./cmd/kyrc
+    binary: kyrc
+    env:
+      # Static binary: no libc dependency, so one artifact works on
+      # glibc AND musl (Alpine). This kills a whole class of support tickets.
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ignore:
+      # Windows on arm64 is niche; drop it to keep the matrix lean.
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      # Bake version/commit/date so `kyrc --version` and bug reports are
+      # actionable.
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.ShortCommit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: kyrc
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:", "^chore:"]
