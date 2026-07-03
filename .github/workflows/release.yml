@@ -1,0 +1,73 @@
+# Release kyrc on a version tag.
+#
+#   git tag v0.1.2 && git push origin v0.1.2
+#
+# CI then builds the cross-platform static binaries (GoReleaser stamps the
+# tag version into `kyrc --version` via ldflags), stages the npm packages at
+# that same version, and publishes all six — platform packages first, then
+# the meta-package — using the NPM_TOKEN repo secret. No local terminal, no
+# OTP, no manual token juggling.
+#
+# One-time setup:
+#   Settings → Secrets and variables → Actions → New repository secret
+#     NPM_TOKEN = an npm "Automation" token (bypasses 2FA), scope @kyrc
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # GoReleaser creates the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # GoReleaser needs full history + tags
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      # Build the static-binary matrix + GitHub Release. The tag drives the
+      # version, so `kyrc --version` matches the published npm version.
+      - name: GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> 2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Stage all npm packages at the tag version (strip leading "v").
+      - name: Stage npm packages
+        env:
+          KYRC_VERSION: ${{ github.ref_name }}
+        run: |
+          node npm/scripts/build-packages.js
+          node npm/scripts/sync-meta-version.js
+
+      # Publish platform packages FIRST so the meta-package's pinned
+      # optionalDependencies already exist when it goes up.
+      - name: Publish platform packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          for d in npm/packages/*/; do
+            ( cd "$d" && npm publish --access public )
+          done
+
+      - name: Publish meta-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd npm/kyrc && npm publish --access public
