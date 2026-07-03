@@ -37,6 +37,10 @@ npm's name-similarity filter), but the installed command is still just
 
 ## Why it feels instant
 
+> For the full engineering story — architecture, decisions, and the hurdles
+> we hit (npm binary distribution, 2FA publishing, PTY testing, and more) —
+> see **[docs/ENGINEERING.md](docs/ENGINEERING.md)**.
+
 kyrc is engineered as a real-time input→feedback loop, not a form:
 
 - **The clock is owned deliberately.** Every keystroke is timestamped at
