@@ -1,5 +1,5 @@
 {
-  "name": "kyrc",
+  "name": "@kyrc/kyrc",
   "version": "0.1.0",
   "description": "A fast terminal typing test",
   "bin": {

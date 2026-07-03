@@ -6,10 +6,10 @@ import { motion } from "motion/react";
 // via the npm ecosystem (a Go static binary delivered through per-platform
 // optional-dependency packages).
 const MANAGERS: { id: string; label: string; cmd: string }[] = [
-  { id: "npm", label: "npm", cmd: "npm i -g kyrc" },
-  { id: "bun", label: "bun", cmd: "bun add -g kyrc" },
-  { id: "pnpm", label: "pnpm", cmd: "pnpm add -g kyrc" },
-  { id: "npx", label: "npx", cmd: "npx kyrc" },
+  { id: "npm", label: "npm", cmd: "npm i -g @kyrc/kyrc" },
+  { id: "bun", label: "bun", cmd: "bun add -g @kyrc/kyrc" },
+  { id: "pnpm", label: "pnpm", cmd: "pnpm add -g @kyrc/kyrc" },
+  { id: "npx", label: "npx", cmd: "npx @kyrc/kyrc" },
 ];
 
 export function InstallTabs() {

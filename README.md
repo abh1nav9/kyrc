@@ -20,16 +20,20 @@ Keys: type to start · `backspace` delete · `ctrl+w` delete word ·
 
 ```sh
 # npm
-npm i -g kyrc
+npm i -g @kyrc/kyrc
 
 # bun
-bun add -g kyrc
+bun add -g @kyrc/kyrc
 
 # pnpm
-pnpm add -g kyrc
+pnpm add -g @kyrc/kyrc
 
 # Or grab a static binary from the releases page.
 ```
+
+The package is scoped `@kyrc/kyrc` (the unscoped name `kyrc` is blocked by
+npm's name-similarity filter), but the installed command is still just
+`kyrc`.
 
 ## Why it feels instant
 

@@ -319,7 +319,7 @@ function Footer() {
         <a href={REPO} target="_blank" rel="noreferrer" className="transition-colors hover:text-accent">
           GitHub
         </a>
-        <a href="https://www.npmjs.com/package/kyrc" target="_blank" rel="noreferrer" className="transition-colors hover:text-accent">
+        <a href="https://www.npmjs.com/package/@kyrc/kyrc" target="_blank" rel="noreferrer" className="transition-colors hover:text-accent">
           npm
         </a>
       </div>
