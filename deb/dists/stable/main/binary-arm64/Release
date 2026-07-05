@@ -1,0 +1,5 @@
+Component: main
+Origin: kyrc
+Label: kyrc
+Architecture: arm64
+Description: kyrc apt repository

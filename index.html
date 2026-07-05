@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>kyrc — apt / dnf</title>
+<style>
+  body { font: 16px/1.6 system-ui, sans-serif; max-width: 46rem; margin: 3rem auto; padding: 0 1rem; }
+  h1 { margin-bottom: 0; }
+  pre { background: #111; color: #eee; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+  a { color: #4f7cff; }
+</style>
+
+<h1>kyrc</h1>
+<p>A fast, offline, keyboard-only typing test for your terminal.
+   <a href="https://github.com/abh1nav9/kyrc">Source &amp; other installers →</a></p>
+
+<h2>Debian / Ubuntu (apt)</h2>
+<pre>curl -fsSL https://abh1nav9.github.io/kyrc/kyrc.gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/kyrc.gpg
+echo "deb [signed-by=/usr/share/keyrings/kyrc.gpg] https://abh1nav9.github.io/kyrc/deb stable main" \
+  | sudo tee /etc/apt/sources.list.d/kyrc.list
+sudo apt update &amp;&amp; sudo apt install kyrc</pre>
+
+<h2>Fedora / RHEL (dnf)</h2>
+<pre>sudo tee /etc/yum.repos.d/kyrc.repo &lt;&lt;'REPO'
+[kyrc]
+name=kyrc
+baseurl=https://abh1nav9.github.io/kyrc/rpm
+enabled=1
+repo_gpgcheck=1
+gpgcheck=0
+gpgkey=https://abh1nav9.github.io/kyrc/kyrc.gpg.key
+REPO
+sudo dnf install kyrc</pre>
+
+<h2>Other package managers</h2>
+<pre>brew install abh1nav9/tap/kyrc     # macOS / Linux
+scoop install kyrc                 # Windows (after: scoop bucket add kyrc https://github.com/abh1nav9/scoop-bucket)
+winget install abh1nav9.kyrc       # Windows
+yay -S kyrc-bin                    # Arch
+snap install kyrc                  # Linux
+npm i -g @kyrc/kyrc                # any platform with Node</pre>

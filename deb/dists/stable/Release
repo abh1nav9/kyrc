@@ -1,0 +1,28 @@
+Origin: kyrc
+Label: kyrc
+Codename: stable
+Date: Sun, 05 Jul 2026 07:42:49 UTC
+Architectures: amd64 arm64
+Components: main
+Description: kyrc apt repository
+MD5Sum:
+ 7cc7bc2a16d8a7e639a178b37797720a 513 main/binary-amd64/Packages
+ 4a2af2d2208b126d09beb73a5dbcfe46 379 main/binary-amd64/Packages.gz
+ 1ed6373a162c52412c15239741751044 94 main/binary-amd64/Release
+ e43558dbc901fefa2c61534f700f6749 483 main/binary-arm64/Packages
+ c9f9e5818d08048383f52b4835fab0fe 362 main/binary-arm64/Packages.gz
+ d0ecf5c8424f7047e841e9147e6bdac2 94 main/binary-arm64/Release
+SHA1:
+ 146b9d19f8e9e5ea91fca2c1451de1c77b930dd3 513 main/binary-amd64/Packages
+ ef14f91ddc316d5c9d5b4cb731afcaaa71854bb3 379 main/binary-amd64/Packages.gz
+ e07e5e14c7e793d1a3ea696da7582797ae0d3c62 94 main/binary-amd64/Release
+ 953dce7d35bf384a30fdb143ccf574a790238aa0 483 main/binary-arm64/Packages
+ cac3846df0d09c8534919021374ce48531265cb4 362 main/binary-arm64/Packages.gz
+ 9feab3c663c1372d4616dd6f7d8e510ae6a94708 94 main/binary-arm64/Release
+SHA256:
+ 47c7ed8a31fdbf35c86750038eacce463308970f6bd05d23a825bd02ebfcedd3 513 main/binary-amd64/Packages
+ 9b8835ee386c0304adbaace8f4210fd8a74130124b0652396f5658e1429787a8 379 main/binary-amd64/Packages.gz
+ 580e09e50b6e1809e03314796252c82340172624d39e65c4492ef460b28b123e 94 main/binary-amd64/Release
+ 49a9bf6fc3dd54b883d236a763384baa57469ea2eddb8e7a97fbe5cf0a604694 483 main/binary-arm64/Packages
+ e6ebea1119758693eecc34edbc0ce5aae41ebd47d2de801dfdc0ea7b5a96f73a 362 main/binary-arm64/Packages.gz
+ 6d0aac571277e6300548fedefbcd45f77f60f3c3b3e863beea9a605971e11cb0 94 main/binary-arm64/Release

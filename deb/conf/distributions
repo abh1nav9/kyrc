@@ -1,0 +1,7 @@
+Origin: kyrc
+Label: kyrc
+Codename: stable
+Architectures: amd64 arm64
+Components: main
+Description: kyrc apt repository
+SignWith: A8E073AAB05E59E5
