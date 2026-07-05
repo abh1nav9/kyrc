@@ -4,18 +4,6 @@ Follow these in order. Steps you must do are numbered; commands are copy-paste.
 
 ---
 
-## 0. Rotate the Neon password (do this first)
-
-The database password was exposed, so rotate it before anything else:
-
-1. Neon console → your project → **Roles** → `neondb_owner` → **Reset password**.
-2. Copy the **new** connection string (looks like
-   `postgresql://neondb_owner:NEWPASS@ep-...neon.tech/neondb?sslmode=require`).
-
-You'll paste this new string into Render (step 3) — never into code or git.
-
----
-
 ## 1. Apply the database schema
 
 Needs `psql` locally (`brew install libpq && brew link --force libpq`).

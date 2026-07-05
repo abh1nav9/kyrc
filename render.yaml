@@ -1,23 +1,24 @@
 # Render blueprint for the kyrc leaderboard API.
 #
-# Render reads this from the repo root. The service builds via the Docker
-# image so the server module's `replace => ../` resolves against the parent
-# (CLI) module — a plain "go build ./server" from an isolated context would
-# fail. Import this by pointing Render at the repo ("New → Blueprint").
+# Render reads this at the repo root when you deploy via "New → Blueprint".
+# We build with the NATIVE Go runtime from rootDir: server. The server module
+# has `replace github.com/abh1nav9/kyrc => ../`, which resolves to the repo
+# root (present in the checkout), so building from server/ works.
 #
-# Set the DATABASE_URL secret in the Render dashboard (do NOT commit it).
+# Set DATABASE_URL and CORS_ORIGIN as secrets in the Render dashboard.
 services:
   - type: web
     name: kyrc-leaderboard
-    runtime: docker
-    dockerfilePath: ./server/Dockerfile
-    dockerContext: .            # repo root, so the parent module is available
+    runtime: go
+    rootDir: server            # build the server module, not the repo root
+    buildCommand: go build -o app .
+    startCommand: ./app
     plan: free
     healthCheckPath: /healthz
     envVars:
       - key: DATABASE_URL
-        sync: false            # set in dashboard; never stored in the repo
+        sync: false            # set in dashboard; never in the repo
       - key: CORS_ORIGIN
-        sync: false            # your site origin, e.g. https://kyrc.dev
+        sync: false            # your site origin, or * to start
       - key: PORT
         value: "8080"
