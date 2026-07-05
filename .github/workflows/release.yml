@@ -33,6 +33,11 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # The publish tokens (HOMEBREW_TAP_TOKEN, etc.) and GPG key are stored as
+    # *environment* secrets under the "Production" environment, so the job
+    # must opt into that environment to read them. Without this line,
+    # ${{ secrets.* }} resolves to empty and every publish 401s.
+    environment: Production
     # Expose whether GPG signing succeeded, so the apt/rpm job only runs when
     # there's actually a usable signing key.
     outputs:
@@ -199,6 +204,8 @@ jobs:
     # succeeds for every other channel.
     if: needs.release.outputs.gpg_ready == 'true'
     runs-on: ubuntu-latest
+    # GPG_PRIVATE_KEY / GPG_PASSPHRASE live in the Production environment too.
+    environment: Production
     steps:
       - name: Install repo tooling
         run: |
