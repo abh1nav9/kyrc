@@ -16,7 +16,7 @@ import (
 
 // DefaultBaseURL is the hosted leaderboard API. Overridable via the
 // KYRC_LEADERBOARD_URL env var (read by the caller) for self-hosting/testing.
-const DefaultBaseURL = "https://api.kyrc.dev"
+const DefaultBaseURL = "https://kyrc-server.onrender.com"
 
 // Client talks to the leaderboard API. All methods are best-effort and
 // context-bounded: kyrc is offline-first, so a network failure here must

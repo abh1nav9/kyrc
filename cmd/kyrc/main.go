@@ -45,6 +45,9 @@ func main() {
 		case "sync":
 			runSync()
 			return
+		case "update", "upgrade":
+			runUpdate(os.Args[2:])
+			return
 		}
 	}
 
@@ -159,6 +162,14 @@ usage:
   kyrc -t 30           30-second test
   kyrc -t 1m           1-minute test
   kyrc -q              random quote
+
+commands:
+  kyrc results         your last 10 results (sort by top / low wpm)
+  kyrc login           create or restore a leaderboard account
+  kyrc whoami          show your user_id + where your passkey is saved
+  kyrc leaderboard     view the global leaderboard
+  kyrc sync            push your best result now
+  kyrc update          check for and update to the latest version
 
 keys:
   type       start the test on first keystroke

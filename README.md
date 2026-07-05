@@ -17,6 +17,7 @@ kyrc login      # create or restore a leaderboard account
 kyrc whoami     # show your user_id + where your passkey is saved
 kyrc leaderboard# view the global leaderboard
 kyrc sync       # push your best result now
+kyrc update     # check for a newer version (tells you the right update command)
 ```
 
 Keys: type to start · `backspace` delete · `ctrl+w` delete word ·

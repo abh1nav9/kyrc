@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 // against a local server or the hosted one; it falls back to the default.
 const API =
   (import.meta.env.VITE_LEADERBOARD_URL as string | undefined) ??
-  "https://api.kyrc.dev";
+  "https://kyrc-server.onrender.com";
 
 type Entry = {
   rank: number;
