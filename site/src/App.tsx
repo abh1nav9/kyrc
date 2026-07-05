@@ -131,7 +131,9 @@ function Hero() {
         <div className="mt-4 text-sm text-faint">
           Then just run{" "}
           <code className="rounded bg-bg-soft px-1.5 py-0.5 font-mono text-accent">kyrc</code>
-          . That&apos;s it.
+          . That&apos;s it. Already installed? Run{" "}
+          <code className="rounded bg-bg-soft px-1.5 py-0.5 font-mono text-accent">kyrc update</code>{" "}
+          to get the latest.
         </div>
       </motion.div>
       <motion.div
@@ -188,6 +190,11 @@ const FLAGS: [string, string][] = [
   ["kyrc -t 30", "30-second test"],
   ["kyrc -t 1m", "1-minute test"],
   ["kyrc -q", "random quote"],
+  ["kyrc results", "your last 10 results (sortable)"],
+  ["kyrc login", "create or restore an account"],
+  ["kyrc leaderboard", "view the global leaderboard"],
+  ["kyrc sync", "push your best result now"],
+  ["kyrc update", "update to the latest version"],
 ];
 
 const KEYS: [string, string][] = [

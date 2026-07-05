@@ -28,6 +28,24 @@ yay -S kyrc-bin    # AUR — Arch registration closed during Atomic Arch cleanup
 snap install kyrc  # Snap — store account/name registration pending
 ```
 
+## Updating to the latest version
+
+`kyrc update` checks the latest release, detects how kyrc was installed, and
+prints the right command. Users can run it, or use their manager directly:
+
+| Installed via | Update command |
+|---------------|----------------|
+| npm / bun / pnpm | `npm update -g @kyrc/kyrc` |
+| Homebrew | `brew upgrade kyrc` |
+| Scoop | `scoop update kyrc` |
+| WinGet | `winget upgrade abh1nav9.kyrc` |
+| apt | `sudo apt update && sudo apt install --only-upgrade kyrc` |
+| dnf | `sudo dnf upgrade kyrc` |
+| Snap | `sudo snap refresh kyrc` |
+
+Every channel updates automatically when you push a new `vX.Y.Z` tag — there
+is no per-manager release step to run by hand.
+
 ---
 
 ## One-time setup checklist
