@@ -18,22 +18,41 @@ Keys: type to start · `backspace` delete · `ctrl+w` delete word ·
 
 ## Install
 
+Pick your platform's package manager — all install the same static binary.
+
 ```sh
-# npm
+# macOS / Linux — Homebrew
+brew install abh1nav9/tap/kyrc
+
+# Windows — Scoop
+scoop bucket add kyrc https://github.com/abh1nav9/scoop-bucket
+scoop install kyrc
+
+# Windows — WinGet
+winget install abh1nav9.kyrc
+
+# Arch Linux
+yay -S kyrc-bin
+
+# Linux — Snap
+snap install kyrc
+
+# Debian/Ubuntu (apt) and Fedora/RHEL (dnf)
+#   → https://abh1nav9.github.io/kyrc/
+
+# Any platform with Node — npm / bun / pnpm
 npm i -g @kyrc/kyrc
-
-# bun
 bun add -g @kyrc/kyrc
-
-# pnpm
 pnpm add -g @kyrc/kyrc
 
-# Or grab a static binary from the releases page.
+# Or grab a static binary, .deb, or .rpm from the releases page.
 ```
 
-The package is scoped `@kyrc/kyrc` (the unscoped name `kyrc` is blocked by
+The npm package is scoped `@kyrc/kyrc` (the unscoped name `kyrc` is blocked by
 npm's name-similarity filter), but the installed command is still just
-`kyrc`.
+`kyrc`. For how the release pipeline publishes to every channel from one git
+tag — and the one-time setup each needs — see
+**[docs/DISTRIBUTION.md](docs/DISTRIBUTION.md)**.
 
 ## Why it feels instant
 

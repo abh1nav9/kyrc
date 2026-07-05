@@ -1,16 +1,25 @@
-# Release kyrc on a version tag.
+# Release kyrc on a version tag — one tag fans out to every native installer.
 #
-#   git tag v0.1.2 && git push origin v0.1.2
+#   git tag v0.1.3 && git push origin v0.1.3
 #
-# CI then builds the cross-platform static binaries (GoReleaser stamps the
-# tag version into `kyrc --version` via ldflags), stages the npm packages at
-# that same version, and publishes all six — platform packages first, then
-# the meta-package — using the NPM_TOKEN repo secret. No local terminal, no
-# OTP, no manual token juggling.
+# GoReleaser builds the static-binary matrix (the tag drives `kyrc --version`
+# via ldflags) and publishes to: GitHub Release (archives + deb/rpm files),
+# Homebrew tap, Scoop bucket, WinGet (PR to microsoft/winget-pkgs), AUR, and
+# the Snap Store. The npm packages are staged from the same build and
+# published (platform packages first, then the meta-package). A second job
+# then builds signed APT/RPM repositories and publishes them to GitHub Pages
+# so `apt install` / `dnf install` work.
 #
-# One-time setup:
-#   Settings → Secrets and variables → Actions → New repository secret
-#     NPM_TOKEN = an npm "Automation" token (bypasses 2FA), scope @kyrc
+# One-time secret setup (Settings → Secrets and variables → Actions):
+#   NPM_TOKEN                    npm "Automation" token (bypasses 2FA), @kyrc
+#   HOMEBREW_TAP_TOKEN           PAT with contents:write on abh1nav9/homebrew-tap
+#   SCOOP_BUCKET_TOKEN           PAT with contents:write on abh1nav9/scoop-bucket
+#   WINGET_TOKEN                 PAT with contents:write on abh1nav9/winget-pkgs fork
+#   AUR_KEY                      SSH private key registered with your AUR account
+#   SNAPCRAFT_STORE_CREDENTIALS  output of `snapcraft export-login`
+#   GPG_PRIVATE_KEY              ASCII-armored private key for signing apt/rpm repos
+#   GPG_PASSPHRASE               passphrase for that key (empty string if none)
+# Also: enable GitHub Pages for this repo, source = "gh-pages" branch.
 name: release
 
 on:
@@ -19,7 +28,7 @@ on:
       - "v*"
 
 permissions:
-  contents: write # GoReleaser creates the GitHub Release
+  contents: write # GoReleaser creates the GitHub Release; Pages job pushes gh-pages
 
 jobs:
   release:
@@ -38,17 +47,61 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
-      # Build the static-binary matrix + GitHub Release. The tag drives the
-      # version, so `kyrc --version` matches the published npm version.
+      # Snap is optional: only build/publish it when store credentials are
+      # present. Until then the snapcraft pipe is skipped so a release still
+      # succeeds without a Snap Store account.
+      - name: Decide snap
+        id: snap
+        run: |
+          if [ -n "${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "SNAPCRAFT_STORE_CREDENTIALS not set — skipping Snap."
+          fi
+
+      # snapcraft only needs to be on PATH when we're actually building a snap.
+      - name: Install snapcraft
+        if: steps.snap.outputs.enabled == 'true'
+        run: sudo snap install snapcraft --classic
+
+      # Import the signing key so GoReleaser can sign rpm packages via nfpm
+      # (the apt/rpm *repos* are signed in the pages job below).
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      # Build the whole matrix + publish to every installer channel. Each
+      # block reads the token it needs from env; a missing optional secret
+      # only fails that one channel. Snap is skipped unless enabled above.
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> 2"
-          args: release --clean
+          args: >-
+            release --clean
+            ${{ steps.snap.outputs.enabled == 'true' && ' ' || '--skip=snapcraft' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+          # AUR_KEY omitted — AUR channel disabled (registration shut down).
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
-      # Stage all npm packages at the tag version (strip leading "v").
+      # Keep the built deb/rpm files for the apt/rpm pages job.
+      - name: Upload linux packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            dist/*.deb
+            dist/*.rpm
+          retention-days: 1
+
+      # ---- npm (unchanged) -------------------------------------------------
       - name: Stage npm packages
         env:
           KYRC_VERSION: ${{ github.ref_name }}
@@ -56,8 +109,6 @@ jobs:
           node npm/scripts/build-packages.js
           node npm/scripts/sync-meta-version.js
 
-      # Publish platform packages FIRST so the meta-package's pinned
-      # optionalDependencies already exist when it goes up.
       - name: Publish platform packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -71,3 +122,94 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd npm/kyrc && npm publish --access public
+
+  # ---------------------------------------------------------------------------
+  # Build signed APT + RPM repositories and publish them to GitHub Pages, so
+  # users can `apt install kyrc` / `dnf install kyrc` after adding the repo.
+  # Runs after `release` so the deb/rpm artifacts exist. Accumulates onto the
+  # existing gh-pages content so older versions stay installable.
+  # ---------------------------------------------------------------------------
+  apt-rpm-repo:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install repo tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y reprepro createrepo-c gnupg
+
+      # Pull down the current gh-pages so we append rather than clobber.
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
+        continue-on-error: true
+
+      - name: Ensure pages tree exists
+        run: mkdir -p pages/deb pages/rpm
+
+      - name: Download linux packages
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-packages
+          path: incoming
+
+      - name: Import GPG signing key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          KEYID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec/{print $5; exit}')
+          echo "GPG_KEYID=$KEYID" >> "$GITHUB_ENV"
+          # Export the public key so users can trust the repo.
+          gpg --armor --export "$KEYID" > pages/kyrc.gpg.key
+
+      # ---- APT repo via reprepro ------------------------------------------
+      - name: Build APT repo
+        env:
+          GPG_KEYID: ${{ env.GPG_KEYID }}
+        run: |
+          mkdir -p pages/deb/conf
+          cat > pages/deb/conf/distributions <<EOF
+          Origin: kyrc
+          Label: kyrc
+          Codename: stable
+          Architectures: amd64 arm64
+          Components: main
+          Description: kyrc apt repository
+          SignWith: ${GPG_KEYID}
+          EOF
+          for f in incoming/*.deb; do
+            reprepro -b pages/deb includedeb stable "$f"
+          done
+
+      # ---- RPM repo via createrepo_c --------------------------------------
+      - name: Build RPM repo
+        env:
+          GPG_KEYID: ${{ env.GPG_KEYID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          cp incoming/*.rpm pages/rpm/
+          createrepo_c --update pages/rpm
+          # Sign the repomd so dnf can verify the repository metadata.
+          gpg --batch --yes --pinentry-mode loopback \
+              --passphrase "$GPG_PASSPHRASE" \
+              --local-user "$GPG_KEYID" \
+              --detach-sign --armor pages/rpm/repodata/repomd.xml
+
+      # Install landing page ships as a static file in the repo, so we need
+      # the repo checked out to copy it. (The gh-pages checkout above is a
+      # different ref; grab the tag's tree here.)
+      - name: Checkout source for landing page
+        uses: actions/checkout@v4
+        with:
+          path: src
+      - name: Write install landing page
+        run: cp src/.github/pages/index.html pages/index.html
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages
+          publish_branch: gh-pages
+          keep_files: true

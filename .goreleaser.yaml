@@ -1,7 +1,17 @@
-# GoReleaser builds the cross-platform matrix, produces checksummed
-# archives + GitHub release, and updates a Homebrew tap — all from `git tag`.
+# GoReleaser: one `git tag vX.Y.Z` fans kyrc out to every native installer.
+#
+#   Homebrew  brew install abh1nav9/tap/kyrc        (mac + Linux)
+#   Scoop     scoop install kyrc                     (Windows)
+#   WinGet    winget install abh1nav9.kyrc           (Windows)
+#   AUR       yay -S kyrc-bin                         (Arch)
+#   deb/rpm   apt/dnf via GitHub Pages repo, or dpkg -i the raw file
+#   Snap      snap install kyrc                       (Linux)
+#   npm       npm i -g @kyrc/kyrc                      (staged separately in CI)
+#
 # Retrofitting distribution is miserable; this exists from day one.
 version: 2
+
+project_name: kyrc
 
 before:
   hooks:
@@ -49,3 +59,133 @@ changelog:
   sort: asc
   filters:
     exclude: ["^docs:", "^test:", "^chore:"]
+
+# ---------------------------------------------------------------------------
+# Homebrew — mac + Linux. A cask installs the prebuilt static binary directly
+# (no Ruby formula compile), which matches our CGO_ENABLED=0 artifact. Pushed
+# to a personal tap, so users `brew install abh1nav9/tap/kyrc`.
+# ---------------------------------------------------------------------------
+homebrew_casks:
+  - name: kyrc
+    repository:
+      owner: abh1nav9
+      name: homebrew-tap
+      # HOMEBREW_TAP_TOKEN = a PAT (classic `repo` scope, or fine-grained with
+      # contents:write on homebrew-tap). The default GITHUB_TOKEN cannot push
+      # to a *different* repo, so a dedicated token is required.
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/abh1nav9/kyrc"
+    description: "A fast, offline, keyboard-only typing test for your terminal."
+    # The binary is unsigned, so macOS quarantines it on download. Strip the
+    # quarantine xattr on install so `kyrc` runs without a Gatekeeper prompt.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr",
+                           args: ["-dr", "com.apple.quarantine", "#{staged_path}/kyrc"]
+          end
+
+# ---------------------------------------------------------------------------
+# Scoop — Windows. Manifest pushed to a personal bucket repo, so users
+# `scoop bucket add kyrc https://github.com/abh1nav9/scoop-bucket` then
+# `scoop install kyrc`.
+# ---------------------------------------------------------------------------
+scoops:
+  - name: kyrc
+    repository:
+      owner: abh1nav9
+      name: scoop-bucket
+      token: "{{ .Env.SCOOP_BUCKET_TOKEN }}"
+    homepage: "https://github.com/abh1nav9/kyrc"
+    description: "A fast, offline, keyboard-only typing test for your terminal."
+    license: "MIT"
+
+# ---------------------------------------------------------------------------
+# WinGet — Windows. Manifest generated and pushed to a fork of
+# microsoft/winget-pkgs, then a PR is opened for Microsoft to review/merge.
+# First submission of a new package can take a manual review pass.
+# ---------------------------------------------------------------------------
+winget:
+  - name: kyrc
+    publisher: abh1nav9
+    short_description: "A fast, offline, keyboard-only typing test for your terminal."
+    license: "MIT"
+    homepage: "https://github.com/abh1nav9/kyrc"
+    publisher_url: "https://github.com/abh1nav9"
+    package_identifier: abh1nav9.kyrc
+    repository:
+      owner: abh1nav9
+      name: winget-pkgs
+      branch: "kyrc-{{ .Version }}"
+      token: "{{ .Env.WINGET_TOKEN }}"
+      pull_request:
+        enabled: true
+        draft: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+
+# ---------------------------------------------------------------------------
+# nfpms — build .deb and .rpm packages. Attached to the GitHub Release (so
+# `dpkg -i` / `rpm -i` work immediately) AND fed into the APT/RPM repos
+# published to GitHub Pages (see release.yml).
+# ---------------------------------------------------------------------------
+nfpms:
+  - id: kyrc
+    package_name: kyrc
+    vendor: abh1nav9
+    homepage: "https://github.com/abh1nav9/kyrc"
+    maintainer: "abh1nav9 <noreply@github.com>"
+    description: "A fast, offline, keyboard-only typing test for your terminal."
+    license: "MIT"
+    formats: [deb, rpm]
+    bindir: /usr/bin
+
+# ---------------------------------------------------------------------------
+# AUR — Arch Linux. DISABLED: AUR registration is intentionally shut down
+# during the Arch team's "Atomic Arch" supply-chain cleanup (hijacked orphan
+# packages), so new accounts / SSH keys can't be created right now. Re-enable
+# by uncommenting this block once registration reopens and AUR_KEY is set.
+# ---------------------------------------------------------------------------
+# aurs:
+#   - name: kyrc-bin
+#     homepage: "https://github.com/abh1nav9/kyrc"
+#     description: "A fast, offline, keyboard-only typing test for your terminal."
+#     maintainers:
+#       - "abh1nav9 <noreply@github.com>"
+#     license: "MIT"
+#     private_key: "{{ .Env.AUR_KEY }}"
+#     git_url: "ssh://aur@aur.archlinux.org/kyrc-bin.git"
+#     package: |-
+#       install -Dm755 "./kyrc" "${pkgdir}/usr/bin/kyrc"
+#       install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/kyrc-bin/LICENSE"
+
+# ---------------------------------------------------------------------------
+# Snap — Linux. Built and pushed to the Snap Store. Requires snapcraft
+# credentials (SNAPCRAFT_STORE_CREDENTIALS) and `snapcraft` present in CI.
+# ---------------------------------------------------------------------------
+snapcrafts:
+  - id: kyrc
+    name: kyrc
+    summary: "A fast, offline, keyboard-only typing test for your terminal."
+    description: |
+      kyrc (KeyRacer) is a Monkeytype-style typing test that lives in your
+      terminal. It starts in milliseconds, works fully offline, and never
+      asks you to log in.
+    grade: stable
+    confinement: strict
+    license: MIT
+    publish: true
+    apps:
+      kyrc:
+        command: kyrc
+        plugs: ["home", "network"]
+
+release:
+  github:
+    owner: abh1nav9
+    name: kyrc
+  draft: false
+  prerelease: auto
