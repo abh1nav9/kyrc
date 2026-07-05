@@ -1,15 +1,15 @@
 Package: kyrc
-Version: 0.2.0
+Version: 0.2.1
 Architecture: arm64
 Maintainer: abh1nav9 <noreply@github.com>
 Installed-Size: 6656
 Homepage: https://github.com/abh1nav9/kyrc
 Priority: optional
 Section: 
-Filename: pool/main/k/kyrc/kyrc_0.2.0_arm64.deb
-Size: 2716372
-SHA256: d88bdae59823937a301eaa2668052c51bb79c651472921acb8971455720b14e5
-SHA1: c961734e361b09912a48f33ea390c3c43e744ce1
-MD5sum: d3d563eec848439c0b3acad4ebbbc560
+Filename: pool/main/k/kyrc/kyrc_0.2.1_arm64.deb
+Size: 2716368
+SHA256: bc7ea8904e93e62e58d6fb8733ea82c5a5893a171a677ecf2d9afabf8801e805
+SHA1: e0d92aebb5552154e9c6af9832019e30e18c2c89
+MD5sum: 7f7e1f86f8a2393f5132486811c29693
 Description: A fast, offline, keyboard-only typing test for your terminal.
 

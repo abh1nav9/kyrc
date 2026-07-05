@@ -4,35 +4,35 @@ Hash: SHA512
 Origin: kyrc
 Label: kyrc
 Codename: stable
-Date: Sun, 05 Jul 2026 09:00:38 UTC
+Date: Sun, 05 Jul 2026 09:05:48 UTC
 Architectures: amd64 arm64
 Components: main
 Description: kyrc apt repository
 MD5Sum:
- 07fca25b7d40d407bd85e1e54c7dcd67 513 main/binary-amd64/Packages
- 666ba01df6701d9783c429f0de9f190e 378 main/binary-amd64/Packages.gz
+ 40615a9a8b1272a800cc05e827612779 513 main/binary-amd64/Packages
+ dfd5b4c5e4dbcd76d33cc88198c8c950 379 main/binary-amd64/Packages.gz
  1ed6373a162c52412c15239741751044 94 main/binary-amd64/Release
- 9fa2f02958878e07625d53f709ef12d3 483 main/binary-arm64/Packages
- 4046c6747e6d09237a37a4d634b2cdfa 367 main/binary-arm64/Packages.gz
+ e548158386c084682886dca5a4af71e6 483 main/binary-arm64/Packages
+ 31d3414a8569877ac0e4064befabf1d1 365 main/binary-arm64/Packages.gz
  d0ecf5c8424f7047e841e9147e6bdac2 94 main/binary-arm64/Release
 SHA1:
- 9a59920f2852c61dd5a5e4f8f06c8ce09d763967 513 main/binary-amd64/Packages
- 2a8ad618017985498c2bc8c4fdce3623494a984e 378 main/binary-amd64/Packages.gz
+ ca512baa88af678a4a9d981ef87f3e326852f208 513 main/binary-amd64/Packages
+ 715fb830f412b8409e43fe17ca3ecad0fa39f8d6 379 main/binary-amd64/Packages.gz
  e07e5e14c7e793d1a3ea696da7582797ae0d3c62 94 main/binary-amd64/Release
- c4f460ca3c52410b6a9b690aa17d6ce9bd74f1e7 483 main/binary-arm64/Packages
- 0ac70b5d9f510f2de0392ada28e767c6e891a142 367 main/binary-arm64/Packages.gz
+ 59cdc207dab8859ca33aec27be9b6c4655430022 483 main/binary-arm64/Packages
+ 7cf66d8ca24abb114620953555e4df5412c4143d 365 main/binary-arm64/Packages.gz
  9feab3c663c1372d4616dd6f7d8e510ae6a94708 94 main/binary-arm64/Release
 SHA256:
- 943fd2fc684ac754843a2507f6eedcecd9f3e1c1237a128fa7517ccb22a5cdcb 513 main/binary-amd64/Packages
- 98cb045828d258326f33c9b1644507098fc665fa2be484633a8a5597b94f9f1c 378 main/binary-amd64/Packages.gz
+ a8e6a756f68e7ab1e71217340b04ff3c9ee0bbf98da0573affec7fe96815648f 513 main/binary-amd64/Packages
+ e36fff5f7e952f94302fad8a66ea5786b978327348ca728153b972f93b4962c7 379 main/binary-amd64/Packages.gz
  580e09e50b6e1809e03314796252c82340172624d39e65c4492ef460b28b123e 94 main/binary-amd64/Release
- 39cc6b3903ebb469c0a30a84bcca6856441525773dc488118ff883d71a984e59 483 main/binary-arm64/Packages
- d4c9cab10154869876a742070f3e11693b572e6b8bdc82f73592ad61edac669a 367 main/binary-arm64/Packages.gz
+ 1d97729118741d1666ffd91e1d3ba66a95f5bc58e04a78b148f0ca738a8ab405 483 main/binary-arm64/Packages
+ 6c5b386bc55c6421189c963950daeba8e866a994325de4aae58294e6e927168c 365 main/binary-arm64/Packages.gz
  6d0aac571277e6300548fedefbcd45f77f60f3c3b3e863beea9a605971e11cb0 94 main/binary-arm64/Release
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQTGkn9m3zf1Y80QqzOo4HOqsF5Z5QUCakodNgAKCRCo4HOqsF5Z
-5RYvAP4oE8CRj/JXZSBS/YgC02P5clx3JUMzYmK0moYbCmp0VgEAjUvfghcjBK6r
-bfWNpiIqwmgYyrvkYsj0yX9kkxJhZQg=
-=QWOG
+iHUEARYKAB0WIQTGkn9m3zf1Y80QqzOo4HOqsF5Z5QUCakoebAAKCRCo4HOqsF5Z
+5cZUAP0UbekSkBqjV69SH/G0RUveeFsmHWXdRCq0Q/IZwd1YoAEApfDL+raIJfqr
+mJhlfcjE2DbIoZGMgWMk82dEWwrg9w0=
+=855F
 -----END PGP SIGNATURE-----
