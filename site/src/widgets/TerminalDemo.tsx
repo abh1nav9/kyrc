@@ -98,7 +98,7 @@ export function TerminalDemo() {
         <span className="ml-2 font-mono text-xs text-faint">kyrc</span>
       </div>
 
-      <div className="flex min-h-[230px] flex-col justify-center px-6 py-7 font-mono">
+      <div className="flex min-h-[230px] flex-col justify-center px-4 py-7 font-mono sm:px-6">
         <AnimatePresence mode="wait">
           {finished ? (
             <motion.div
@@ -119,7 +119,7 @@ export function TerminalDemo() {
               transition={{ duration: 0.15 }}
             >
               <div className="mb-[18px] text-[15px] font-bold text-accent">2.4s</div>
-              <p className="text-[18px] leading-[1.8] tracking-[0.5px] break-words whitespace-pre-wrap">
+              <p className="text-[15px] leading-[1.8] tracking-[0.5px] break-words whitespace-pre-wrap sm:text-[18px]">
                 {TARGET.split("").map((ch, i) => {
                   const st = stateFor(i);
                   const shown =

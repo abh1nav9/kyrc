@@ -54,7 +54,7 @@ export function InstallTabs() {
   }
 
   return (
-    <div className="max-w-lg overflow-hidden rounded-[10px] border border-border bg-bg-panel">
+    <div className="w-full max-w-lg overflow-hidden rounded-[10px] border border-border bg-bg-panel">
       <div
         className="flex flex-wrap gap-1 border-b border-border bg-bg-soft p-1.5"
         role="tablist"
@@ -107,7 +107,7 @@ export function InstallTabs() {
         </div>
       ) : (
         <div className="flex items-start justify-between gap-3 px-4 py-3.5 text-sm">
-          <code className="min-w-0 flex-1 font-mono leading-relaxed">
+          <code className="min-w-0 flex-1 break-all font-mono leading-relaxed">
             {current.note && (
               <span className="block text-faint">
                 <span className="mr-1.5 text-term">$</span>

@@ -33,6 +33,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Never allow horizontal scroll — any wide child (terminal demo, code,
+   tables) must scroll inside its own container, not push the page. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* Radial glow backdrop — cleaner as one rule than a utility soup. */
 body::before {
   content: "";
