@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { TerminalDemo } from "./TerminalDemo";
 import { InstallTabs } from "./InstallTabs";
+import { Leaderboard } from "./Leaderboard";
 
 const REPO = "https://github.com/abh1nav9/kyrc";
 
@@ -33,13 +34,56 @@ export function App() {
   return (
     <div className="relative z-[1] mx-auto max-w-[1080px] px-6">
       <Nav />
+      <OpenSourceBanner />
       <Hero />
       <Features />
+      <LeaderboardSection />
       <Docs />
+      <Identity />
       <Metrics />
       <Architecture />
       <Footer />
     </div>
+  );
+}
+
+// OpenSourceBanner is a slim, dismissible-free strip stating kyrc is open
+// source — a point of pride and trust, linking straight to the repo.
+function OpenSourceBanner() {
+  return (
+    <a
+      href={REPO}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-accent-soft bg-accent-soft/10 px-4 py-2 text-center text-sm text-dim transition-colors hover:border-accent hover:text-text"
+    >
+      <span className="text-accent">★</span>
+      <span>
+        We are proudly <span className="font-semibold text-accent">OPEN SOURCE</span> — read
+        every line, audit the crypto, send a PR.
+      </span>
+      <span className="text-faint">↗</span>
+    </a>
+  );
+}
+
+function LeaderboardSection() {
+  return (
+    <section id="leaderboard" className="border-t border-border py-14">
+      <Reveal>
+        <SectionHeading>Leaderboard</SectionHeading>
+        <p className="mb-6 max-w-[46rem] text-dim">
+          kyrc runs fully offline — but log in with a name and your best result
+          syncs to a global leaderboard whenever you're online. Scores are{" "}
+          <span className="text-text">signed on your device</span> and{" "}
+          <span className="text-text">replayed on the server</span> from the raw
+          keystroke log, so nobody can fake a WPM or submit as someone else.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <Leaderboard />
+      </Reveal>
+    </section>
   );
 }
 
@@ -50,8 +94,9 @@ function Nav() {
         <span className="text-accent">⌨</span> kyrc
       </a>
       <div className="flex gap-[22px] text-sm text-dim">
+        <a href="#leaderboard" className="transition-colors hover:text-text">leaderboard</a>
         <a href="#usage" className="transition-colors hover:text-text">docs</a>
-        <a href="#metrics" className="transition-colors hover:text-text">metrics</a>
+        <a href="#account" className="transition-colors hover:text-text">account</a>
         <a href="#architecture" className="transition-colors hover:text-text">architecture</a>
         <a href={REPO} target="_blank" rel="noreferrer" className="transition-colors hover:text-text">
           github ↗
@@ -210,6 +255,92 @@ function Docs() {
         </Reveal>
       </div>
     </section>
+  );
+}
+
+// Identity documents the account model: creating one, finding your user_id +
+// passkey, and logging back in on another machine.
+function Identity() {
+  return (
+    <section id="account" className="border-t border-border py-14">
+      <Reveal>
+        <SectionHeading>Your account &amp; passkey</SectionHeading>
+        <p className="mb-6 max-w-[46rem] text-dim">
+          Accounts are optional — kyrc works with no login. When you want on the
+          leaderboard, kyrc gives you a <span className="text-text">user_id</span>{" "}
+          and a <span className="text-text">passkey</span> (a recovery phrase).
+          Your private key never leaves your machine; the passkey is the only
+          way to sign in elsewhere, so keep it safe.
+        </p>
+      </Reveal>
+
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <Reveal>
+          <StepCard title="Create your account">
+            <Code>{`kyrc login "Your Name"`}</Code>
+            <p>
+              Prints your <b>user_id</b> and <b>passkey</b>, and saves a private
+              recovery card locally. Write the passkey down.
+            </p>
+          </StepCard>
+        </Reveal>
+
+        <Reveal delay={0.05}>
+          <StepCard title="See your user_id & passkey anytime">
+            <Code>kyrc whoami</Code>
+            <p>Shows your details and the exact path to your recovery file:</p>
+            <ul className="mt-1 space-y-1 font-mono text-[12.5px] text-faint">
+              <li>macOS · ~/Library/Application Support/kyrc/recovery.txt</li>
+              <li>Linux · ~/.config/kyrc/recovery.txt</li>
+              <li>Windows · %AppData%\kyrc\recovery.txt</li>
+            </ul>
+          </StepCard>
+        </Reveal>
+
+        <Reveal delay={0.1}>
+          <StepCard title="Log in again on a new machine">
+            <Code>kyrc login</Code>
+            <p>
+              Choose <b>“restore”</b>, then enter your <b>user_id</b> and{" "}
+              <b>passkey</b>. kyrc rebuilds the same account — same user_id, same
+              scores.
+            </p>
+          </StepCard>
+        </Reveal>
+
+        <Reveal delay={0.15}>
+          <StepCard title="Push your best & view the board">
+            <Code>kyrc sync</Code>
+            <Code>kyrc leaderboard</Code>
+            <p>
+              Your best result auto-syncs after each test when you're online;{" "}
+              <code className="text-accent">sync</code> forces it. Everything else
+              stays fully offline.
+            </p>
+          </StepCard>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function StepCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="h-full rounded-[10px] border border-border bg-bg-panel p-5.5">
+      <h3 className="mb-3 font-mono text-[13px] uppercase tracking-[1.5px] text-accent-soft">
+        {title}
+      </h3>
+      <div className="space-y-2.5 text-sm text-dim">{children}</div>
+    </div>
+  );
+}
+
+function Code({ children }: { children: ReactNode }) {
+  return (
+    <pre className="overflow-x-auto rounded-md bg-bg-soft px-3 py-2 font-mono text-[13px] text-text">
+      <span className="mr-1.5 text-term">$</span>
+      {children}
+    </pre>
   );
 }
 

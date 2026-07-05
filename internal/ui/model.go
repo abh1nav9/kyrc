@@ -41,6 +41,13 @@ type Model struct {
 	now       time.Time // last observed time, for rendering only
 
 	quitting bool
+
+	// OnFinish, if set, is called once when a test transitions to Finished.
+	// It receives the completed session so the caller can persist results
+	// and (best-effort) sync — the UI stays ignorant of storage/network.
+	// The boolean guards against calling it more than once per test.
+	OnFinish func(*engine.Session, Config)
+	finished bool
 }
 
 // New builds a Model with a freshly generated test.
@@ -85,6 +92,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tickMsg:
 		m.session.Tick(now)
 		if m.session.Phase() == engine.PhaseFinished {
+			m.fireFinish()
 			return m, nil // stop ticking; results screen is static
 		}
 		return m, tick()
@@ -93,6 +101,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleKey(msg, now)
 	}
 	return m, nil
+}
+
+// fireFinish invokes OnFinish exactly once per completed test.
+func (m *Model) fireFinish() {
+	if m.finished || m.OnFinish == nil {
+		return
+	}
+	m.finished = true
+	m.OnFinish(m.session, m.cfg)
 }
 
 func (m Model) handleKey(msg tea.KeyMsg, now time.Time) (tea.Model, tea.Cmd) {
@@ -121,6 +138,9 @@ func (m Model) handleKey(msg tea.KeyMsg, now time.Time) (tea.Model, tea.Cmd) {
 		return m, nil
 	case input.ActionEvent:
 		m.session.Apply(d.Event)
+		if m.session.Phase() == engine.PhaseFinished {
+			m.fireFinish() // word-mode tests finish on the last keystroke
+		}
 		return m, nil
 	}
 	return m, nil
@@ -129,6 +149,7 @@ func (m Model) handleKey(msg tea.KeyMsg, now time.Time) (tea.Model, tea.Cmd) {
 func (m Model) restart() Model {
 	m.session = buildSession(m.cfg)
 	m.warnUntil = time.Time{}
+	m.finished = false
 	return m
 }
 

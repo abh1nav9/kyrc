@@ -11,6 +11,12 @@ kyrc -w 50      # 50-word test
 kyrc -t 30      # 30-second test
 kyrc -t 1m      # 1-minute test
 kyrc -q         # random quote
+
+kyrc results    # your last 10 results (sort by top / low WPM)
+kyrc login      # create or restore a leaderboard account
+kyrc whoami     # show your user_id + where your passkey is saved
+kyrc leaderboard# view the global leaderboard
+kyrc sync       # push your best result now
 ```
 
 Keys: type to start · `backspace` delete · `ctrl+w` delete word ·
@@ -59,6 +65,66 @@ npm's name-similarity filter), but the installed command is still just
 tag — and the one-time setup each needs — see
 **[docs/DISTRIBUTION.md](docs/DISTRIBUTION.md)**.
 
+## Results, accounts & the leaderboard
+
+kyrc keeps working with **no account and no network** — that never changes.
+Every test you take is saved locally (your last 10), and you can review them
+sorted by your best or worst runs:
+
+```sh
+kyrc results     # opens a sortable view: [t] top wpm · [l] low wpm · [r] recent
+```
+
+When you *want* to compete, opt into an account. kyrc gives you a **user_id**
+and a **passkey** (a recovery phrase). Your private key is generated on your
+machine and **never leaves it**; scores are signed locally and the server
+**replays your keystroke log** to verify the WPM — so nobody can fake a score
+or submit as you.
+
+```sh
+kyrc login "Your Name"    # create an account → prints your user_id + passkey
+kyrc whoami               # show your user_id + the path to your recovery file
+kyrc leaderboard          # view the global top typists
+kyrc sync                 # push your best now (also auto-syncs after tests)
+```
+
+### Where to find your user_id and passkey
+
+`kyrc whoami` prints them, and a private recovery card is saved at:
+
+| OS      | Path |
+|---------|------|
+| macOS   | `~/Library/Application Support/kyrc/recovery.txt` |
+| Linux   | `~/.config/kyrc/recovery.txt` |
+| Windows | `%AppData%\kyrc\recovery.txt` |
+
+> Keep this file private — anyone with the passkey can log in as you. kyrc
+> never transmits it; it's only used locally to re-derive your key.
+
+### Logging in again (new machine)
+
+```sh
+kyrc login          # choose "restore", then enter your user_id + passkey
+```
+
+This rebuilds the **same** account — same user_id, same leaderboard identity.
+Because the user_id is a fingerprint of your public key, restoring from the
+passkey always reproduces it exactly.
+
+### How the anti-cheat works (the short version)
+
+- **Accounts can't be spoofed.** Auth is an Ed25519 signature, not a shared
+  secret. The server stores only your *public* key and verifies signatures.
+  Knowing someone's user_id (it's public) grants zero power to act as them.
+- **Scores can't be faked.** Submissions carry the raw, timestamped keystroke
+  log. The server recomputes WPM from it (deriving elapsed time from the log's
+  own timestamps) and rejects anything that doesn't match.
+- **Requests can't be replayed.** A per-submission nonce + timestamp window and
+  a per-run digest stop captured requests and double-submits.
+
+The leaderboard service lives in [`server/`](server/); it's the only component
+that holds the database URL. See [server/README.md](server/README.md).
+
 ## Why it feels instant
 
 > For the full engineering story — architecture, decisions, and the hurdles
@@ -98,13 +164,17 @@ be recomputed and audited from the log alone.
 ## Architecture
 
 ```
-cmd/kyrc            CLI entry, flag parsing, version metadata (ldflags)
+cmd/kyrc            CLI entry, flag parsing, subcommands, version metadata
 internal/engine     pure state machine + metrics (no terminal, fully tested)
 internal/wordsource word/quote generation behind a Source interface
 internal/input      terminal key → engine event translation (+ timestamps)
-internal/ui         Bubble Tea adapter: renders the engine, owns no state math
+internal/ui         Bubble Tea adapter: typing + results screens
+internal/store      local results history (last 10), offline, atomic writes
+internal/identity   Ed25519 keypair, user_id, recovery phrase, key files
+internal/leaderboard signed submission protocol, replay anti-cheat, sync client
+server/             leaderboard API in front of Neon/Postgres (its own module)
 npm/                esbuild-style npm distribution (meta pkg + platform pkgs)
-site/               React landing page (install steps + docs)
+site/               React landing page (install, leaderboard, account docs)
 .goreleaser.yaml    cross-platform static binaries + GitHub releases
 ```
 

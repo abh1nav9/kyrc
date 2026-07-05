@@ -25,13 +25,38 @@ var (
 )
 
 func main() {
+	// Subcommands are opt-in extras. A bare `kyrc` (or any flags) still
+	// starts a test instantly — the instant, no-login first run is the
+	// product, so identity/leaderboard live behind explicit verbs.
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "results", "history":
+			runResults()
+			return
+		case "login", "account":
+			runLogin(os.Args[2:])
+			return
+		case "whoami":
+			runWhoami()
+			return
+		case "leaderboard", "board":
+			runLeaderboard()
+			return
+		case "sync":
+			runSync()
+			return
+		}
+	}
+
 	cfg, err := parseArgs(os.Args[1:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "kyrc:", err)
 		os.Exit(2)
 	}
 
-	p := tea.NewProgram(ui.New(cfg), tea.WithAltScreen())
+	m := ui.New(cfg)
+	m.OnFinish = saveAndSync // persist the result + best-effort leaderboard sync
+	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintln(os.Stderr, "kyrc:", err)
 		os.Exit(1)
