@@ -105,8 +105,43 @@ jobs:
           passphrase: ${{ steps.gpg.outputs.passphrase }}
 
       # Build the whole matrix + publish to every installer channel. Each
+      # Sanitize + preflight the publish tokens. Trailing whitespace/newlines
+      # in a secret produce a malformed auth header → "401 Bad credentials"
+      # in CI while the same token works locally. We strip whitespace, export
+      # the clean value, and actively test each token against its repo so a
+      # bad one fails HERE with a clear message (not a generic GoReleaser 401).
+      - name: Preflight publish tokens
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          fail=0
+          check() {
+            name="$1"; raw="$2"; repo="$3"
+            clean="$(printf '%s' "$raw" | tr -d '[:space:]')"
+            if [ -z "$clean" ]; then
+              echo "::error::$name is empty"; fail=1; return
+            fi
+            code=$(curl -s -o /dev/null -w '%{http_code}' \
+              -H "Authorization: token $clean" \
+              "https://api.github.com/repos/abh1nav9/$repo")
+            if [ "$code" = "200" ]; then
+              echo "$name → abh1nav9/$repo: OK ($code)"
+              echo "$name=$clean" >> "$GITHUB_ENV"
+            else
+              echo "::error::$name failed on abh1nav9/$repo (HTTP $code). Token is invalid, lacks repo scope, or (if SSO) is not authorized."
+              fail=1
+            fi
+          }
+          check HOMEBREW_TAP_TOKEN "$HOMEBREW_TAP_TOKEN" homebrew-tap
+          check SCOOP_BUCKET_TOKEN "$SCOOP_BUCKET_TOKEN" scoop-bucket
+          check WINGET_TOKEN       "$WINGET_TOKEN"       winget-pkgs
+          [ "$fail" = "0" ] || { echo "One or more publish tokens are invalid — see errors above."; exit 1; }
+
       # block reads the token it needs from env; a missing optional secret
       # only fails that one channel. Snap is skipped unless enabled above.
+      # Tokens come from $GITHUB_ENV (sanitized by the preflight step above).
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -116,9 +151,6 @@ jobs:
             ${{ steps.snap.outputs.enabled == 'true' && ' ' || '--skip=snapcraft' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
-          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
           # AUR_KEY omitted — AUR channel disabled (registration shut down).
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
