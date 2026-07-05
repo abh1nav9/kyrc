@@ -33,6 +33,10 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Expose whether GPG signing succeeded, so the apt/rpm job only runs when
+    # there's actually a usable signing key.
+    outputs:
+      gpg_ready: ${{ steps.import_gpg.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,13 +69,40 @@ jobs:
         if: steps.snap.outputs.enabled == 'true'
         run: sudo snap install snapcraft --classic
 
-      # Import the signing key so GoReleaser can sign rpm packages via nfpm
-      # (the apt/rpm *repos* are signed in the pages job below).
+      # apt/dnf signing is optional: only when a GPG key is provided. A bad or
+      # missing key must never block the core installers, so this is gated on
+      # the secret AND marked continue-on-error.
+      - name: Decide GPG
+        id: gpg
+        env:
+          RAW_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          if [ -n "${{ secrets.GPG_PRIVATE_KEY }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "GPG_PRIVATE_KEY not set — apt/dnf repo signing skipped."
+          fi
+          # Trim whitespace so a secret set to " " (a space) counts as empty.
+          # A passphrase-less key must get an empty passphrase, not " ".
+          TRIMMED="$(printf '%s' "$RAW_PASSPHRASE" | tr -d '[:space:]')"
+          echo "passphrase=$TRIMMED" >> "$GITHUB_OUTPUT"
+
+      # Import the signing key so the apt/rpm repos (built in the pages job)
+      # can be signed. continue-on-error: a malformed key degrades to
+      # "no apt/dnf" rather than failing the whole release.
+      #
+      # NOTE: `passphrase:` is only passed when GPG_PASSPHRASE is non-empty.
+      # For a passphrase-less key, passing an (empty/whitespace) passphrase
+      # makes the action's test-unlock fail — so we omit it entirely instead.
       - name: Import GPG key
+        id: import_gpg
+        if: steps.gpg.outputs.enabled == 'true'
+        continue-on-error: true
         uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          passphrase: ${{ steps.gpg.outputs.passphrase }}
 
       # Build the whole matrix + publish to every installer channel. Each
       # block reads the token it needs from env; a missing optional secret
@@ -131,6 +162,10 @@ jobs:
   # ---------------------------------------------------------------------------
   apt-rpm-repo:
     needs: release
+    # Only build the signed apt/dnf repos when the release job actually
+    # imported a usable GPG key. No key → no apt/dnf, but the release still
+    # succeeds for every other channel.
+    if: needs.release.outputs.gpg_ready == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Install repo tooling
@@ -190,9 +225,11 @@ jobs:
         run: |
           cp incoming/*.rpm pages/rpm/
           createrepo_c --update pages/rpm
+          # Trim whitespace so a " " passphrase secret counts as empty.
+          PASS="$(printf '%s' "$GPG_PASSPHRASE" | tr -d '[:space:]')"
           # Sign the repomd so dnf can verify the repository metadata.
           gpg --batch --yes --pinentry-mode loopback \
-              --passphrase "$GPG_PASSPHRASE" \
+              --passphrase "$PASS" \
               --local-user "$GPG_KEYID" \
               --detach-sign --armor pages/rpm/repodata/repomd.xml
 
