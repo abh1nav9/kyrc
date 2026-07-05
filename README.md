@@ -18,9 +18,16 @@ Keys: type to start · `backspace` delete · `ctrl+w` delete word ·
 
 ## Install
 
-Pick your platform's package manager — all install the same static binary.
+The canonical package is **`@kyrc/kyrc`** on npm. Every channel installs the
+same static binary, and the installed command is always `kyrc`.
 
 ```sh
+# Any platform with Node — npm / bun / pnpm (recommended)
+npm i -g @kyrc/kyrc
+bun add -g @kyrc/kyrc
+pnpm add -g @kyrc/kyrc
+npx @kyrc/kyrc            # run without installing
+
 # macOS / Linux — Homebrew
 brew install abh1nav9/tap/kyrc
 
@@ -31,22 +38,20 @@ scoop install kyrc
 # Windows — WinGet
 winget install abh1nav9.kyrc
 
-# Arch Linux
-yay -S kyrc-bin
-
-# Linux — Snap
-snap install kyrc
-
 # Debian/Ubuntu (apt) and Fedora/RHEL (dnf)
 #   → https://abh1nav9.github.io/kyrc/
 
-# Any platform with Node — npm / bun / pnpm
-npm i -g @kyrc/kyrc
-bun add -g @kyrc/kyrc
-pnpm add -g @kyrc/kyrc
-
 # Or grab a static binary, .deb, or .rpm from the releases page.
 ```
+
+### In progress
+
+These channels are wired up but not publishing yet:
+
+- **AUR** (`yay -S kyrc-bin`) — Arch is holding new AUR registrations during
+  the "Atomic Arch" supply-chain cleanup; enabled the moment it reopens.
+- **Snap** (`snap install kyrc`) — Snap Store account/name registration
+  pending.
 
 The npm package is scoped `@kyrc/kyrc` (the unscoped name `kyrc` is blocked by
 npm's name-similarity filter), but the installed command is still just

@@ -6,17 +6,26 @@ is automatic, but each channel needs **one-time setup** first. This file is the
 checklist. Nothing here is done automatically — the release will simply skip
 (or fail) a channel whose secret/repo is missing.
 
-## TL;DR — what a user runs once everything is set up
+## TL;DR — how a user installs
+
+Canonical package: **`@kyrc/kyrc`** on npm. Installed command is always `kyrc`.
+
+**Live now:**
 
 ```sh
+npm i -g @kyrc/kyrc                                               # anywhere w/ Node
 brew install abh1nav9/tap/kyrc                                    # macOS / Linux
 scoop bucket add kyrc https://github.com/abh1nav9/scoop-bucket    # Windows
   && scoop install kyrc
 winget install abh1nav9.kyrc                                      # Windows
-yay -S kyrc-bin                                                   # Arch
-snap install kyrc                                                 # Linux
-npm i -g @kyrc/kyrc                                               # anywhere w/ Node
 # apt / dnf: see the landing page at https://abh1nav9.github.io/kyrc/
+```
+
+**In progress** (wired up, not publishing yet):
+
+```sh
+yay -S kyrc-bin    # AUR — Arch registration closed during Atomic Arch cleanup
+snap install kyrc  # Snap — store account/name registration pending
 ```
 
 ---
@@ -77,16 +86,16 @@ gpg --armor --export-secret-keys <KEYID>   # → GPG_PRIVATE_KEY secret
 
 ## What each channel needs, in one glance
 
-| Channel | Auto from tag? | Blocking prerequisite |
-|---------|----------------|-----------------------|
-| GitHub Release (archives + `.deb`/`.rpm` files) | ✅ | none (uses built-in `GITHUB_TOKEN`) |
-| npm | ✅ | `NPM_TOKEN` |
-| Homebrew | ✅ | `homebrew-tap` repo + `HOMEBREW_TAP_TOKEN` |
-| Scoop | ✅ | `scoop-bucket` repo + `SCOOP_BUCKET_TOKEN` |
-| WinGet | ✅ (opens a PR) | `winget-pkgs` fork + `WINGET_TOKEN`; **first submit is manually reviewed by Microsoft** |
-| AUR | ✅ | AUR account + `AUR_KEY` |
-| Snap | ✅ | registered name + `SNAPCRAFT_STORE_CREDENTIALS` |
-| apt / dnf (Pages repo) | ✅ | GPG secrets + Pages enabled |
+| Channel | Status | Blocking prerequisite |
+|---------|--------|-----------------------|
+| GitHub Release (archives + `.deb`/`.rpm` files) | ✅ live | none (uses built-in `GITHUB_TOKEN`) |
+| npm | ✅ live | `NPM_TOKEN` |
+| Homebrew | ✅ live | `homebrew-tap` repo + `HOMEBREW_TAP_TOKEN` |
+| Scoop | ✅ live | `scoop-bucket` repo + `SCOOP_BUCKET_TOKEN` |
+| WinGet | ✅ live (opens a PR) | `winget-pkgs` fork + `WINGET_TOKEN`; **first submit is manually reviewed by Microsoft** |
+| apt / dnf (Pages repo) | ✅ live | GPG secrets + Pages enabled |
+| AUR | 🚧 in progress | AUR account + `AUR_KEY` — **registration closed** during Arch's Atomic Arch cleanup; `aurs:` block is commented out in `.goreleaser.yaml` |
+| Snap | 🚧 in progress | registered name + `SNAPCRAFT_STORE_CREDENTIALS` — store account pending; auto-skipped until the secret is set |
 
 ## Verifying a release
 
